@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KOLAM – Processor</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script defer src="app.js"></script>
+    <script>
+      window.BACKEND_BASE = 'https://kolam-backend.onrender.com';
+    </script>
+    <link rel="icon" href="data:,">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">HeritageXtecH · KOLAM</div>
+      <div class="subtitle">Image to Processed + Recreation</div>
+    </header>
+
+    <main class="container">
+      <section class="panel upload">
+        <h2>Upload</h2>
+        <form id="uploadForm">
+          <input type="file" id="fileInput" name="image" accept="image/png, image/jpeg" required />
+          <button type="submit" id="submitBtn">Process</button>
+        </form>
+        <div id="status" class="status"></div>
+        <div id="counters" class="status"></div>
+
+        <div class="samples">
+          <div class="samples-title">Try our sample Kolam images:</div>
+          <div class="thumbs" id="samples"></div>
+        </div>
+      </section>
+
+      <section class="grid" id="results" hidden>
+        <div class="card">
+          <h3>Original</h3>
+          <div class="placeholder"><span>Original</span><img id="imgInput" alt="Original" /></div>
+        </div>
+        <div class="card">
+          <h3>Processed</h3>
+          <div class="placeholder"><span>Processed</span><img id="imgProcessed" alt="Processed" /></div>
+        </div>
+        <div class="card">
+          <h3>Recreated (Images)</h3>
+          <div class="thumbs" id="recreated"></div>
+        </div>
+        <div class="card">
+          <h3>SVG (Vector)</h3>
+          <object id="svgObject" type="image/svg+xml"></object>
+          <div class="actions">
+            <a id="svgDownload" href="#" download>Download SVG</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Built for KOLAM · Clean, minimal UI</footer>
+  </body>
+  </html>
+
+

@@ -1,0 +1,10 @@
+flask
+flask-cors
+pillow
+opencv-python
+numpy
+svgwrite
+requests
+imageio
+scikit-image
+scipy
