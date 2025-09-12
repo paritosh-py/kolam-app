@@ -8,3 +8,4 @@ requests
 imageio
 scikit-image
 scipy
+gunicorn
