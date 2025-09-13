@@ -31,8 +31,11 @@ def _dedupe_centers(centers, min_dist=8):
     return kept
 
 def _save_debug(img, name):
-    os.makedirs("tmp", exist_ok=True)
-    path = os.path.join("tmp", name)
+    # Use the same tmp directory as the backend
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    TMP_DIR = os.path.join(BASE_DIR, 'tmp')
+    os.makedirs(TMP_DIR, exist_ok=True)
+    path = os.path.join(TMP_DIR, name)
     cv2.imwrite(path, img)
     return path
 
@@ -217,8 +220,11 @@ def process_image(img_path, debug=False,
             cv2.line(vis, (int(poly[i][0]), int(poly[i][1])), (int(poly[i+1][0]), int(poly[i+1][1])), (0,255,0), 2)
 
     out_name = os.path.basename(img_path).rsplit('.',1)[0] + "_processed.png"
-    out_path = os.path.join("tmp", out_name)
-    os.makedirs("tmp", exist_ok=True)
+    # Use the same tmp directory as the backend
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    TMP_DIR = os.path.join(BASE_DIR, 'tmp')
+    out_path = os.path.join(TMP_DIR, out_name)
+    os.makedirs(TMP_DIR, exist_ok=True)
     cv2.imwrite(out_path, vis)
 
     # Prepare debug files if requested (save intermediate masks)

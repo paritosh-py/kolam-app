@@ -1,66 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KOLAM – Processor</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script defer src="app.js"></script>
-    <script>
-      window.BACKEND_BASE = 'https://kolam-app-backend.onrender.com';
-    </script>
-    <link rel="icon" href="data:,">
-  </head>
-  <body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeritageXtecH · KOLAM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
     <header class="topbar">
-      <div class="brand">HeritageXtecH · KOLAM</div>
-      <div class="subtitle">Image to Processed + Recreation</div>
+        <div class="brand">HeritageXtecH · KOLAM</div>
+        <div class="subtitle">Preserving Cultural Heritage by decoding KOLAMS</div>
     </header>
 
     <main class="container">
-      <section class="panel upload">
-        <h2>Upload</h2>
-        <form id="uploadForm">
-          <input type="file" id="fileInput" name="image" accept="image/png, image/jpeg" required />
-          <button type="submit" id="submitBtn">Process</button>
-        </form>
-        <div id="status" class="status"></div>
-        <div id="counters" class="status"></div>
+        <div class="facts-container left">
+            <div class="fact-bubble">
+                <h3>Did You Know?</h3>
+                <p>Kolams are drawn using rice flour as a symbolic offering of food to insects and small creatures.</p>
+            </div>
+            <div class="fact-bubble">
+                <h3>Mathematical Marvel</h3>
+                <p>Each Kolam pattern contains complex geometric principles and symmetrical algorithms.</p>
+            </div>
+        </div>
 
-        <div class="samples">
-          <div class="samples-title">Try our sample Kolam images:</div>
-          <div class="thumbs" id="samples"></div>
-        </div>
-      </section>
+        <section class="panel upload">
+            <h2>Upload Your Kolam</h2>
+            <form id="uploadForm">
+                <input type="file" id="fileInput" name="image" accept="image/png, image/jpeg" required />
+                <button type="submit" id="submitBtn">Process Kolam</button>
+            </form>
+            <div id="status" class="status"></div>
+            <div id="counters" class="counter-animation">
+                <div class="counter-item">
+                    <div class="counter-value" id="dotsCount">0</div>
+                    <div class="counter-label">Dots Detected</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-value" id="linesCount">0</div>
+                    <div class="counter-label">Lines Detected</div>
+                </div>
+                <div class="disclaimer">
+                    This prototype is still under development. These figures may be inaccurate.
+                </div>
+            </div>
 
-      <section class="grid" id="results" hidden>
-        <div class="card">
-          <h3>Original</h3>
-          <div class="placeholder"><span>Original</span><img id="imgInput" alt="Original" /></div>
+            <div class="samples">
+                <div class="samples-title">Try our sample Kolam images:</div>
+                <div class="thumbs" id="samples"></div>
+            </div>
+
+            <div id="results" class="results-grid" hidden>
+                <div class="result-card">
+                    <h3>Original</h3>
+                    <img id="imgInput" alt="Original Kolam">
+                </div>
+                <div class="result-card">
+                    <h3>Processed</h3>
+                    <img id="imgProcessed" alt="Processed Kolam">
+                </div>
+            </div>
+
+            <div class="recreated-showcase" style="display: none;">
+                <h2>AI Generated Variations</h2>
+                <p class="subtitle">Discover computer-generated interpretations of your Kolam</p>
+                <div class="showcase-grid">
+                    <div class="showcase-item">
+                        <h3>Recreated Image</h3>
+                        <img id="imgRecreated" alt="Recreated Kolam">
+                    </div>
+                    <div class="showcase-item">
+                        <h3>Vector Format (SVG)</h3>
+                        <object id="svgObject" type="image/svg+xml"></object>
+                        <a id="svgDownload" class="download-btn" download>Download SVG</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="facts-container right">
+            <div class="fact-bubble">
+                <h3>Cultural Heritage</h3>
+                <p>Kolam patterns are passed down through generations, preserving ancient cultural wisdom.</p>
+            </div>
+            <div class="fact-bubble">
+                <h3>Daily Art</h3>
+                <p>New Kolams are drawn daily at dawn, symbolizing continuous renewal and creativity.</p>
+            </div>
         </div>
-        <div class="card">
-          <h3>Processed</h3>
-          <div class="placeholder"><span>Processed</span><img id="imgProcessed" alt="Processed" /></div>
-        </div>
-        <div class="card">
-          <h3>Recreated (Images)</h3>
-          <div class="thumbs" id="recreated"></div>
-        </div>
-        <div class="card">
-          <h3>SVG (Vector)</h3>
-          <object id="svgObject" type="image/svg+xml"></object>
-          <div class="actions">
-            <a id="svgDownload" href="#" download>Download SVG</a>
-          </div>
-        </div>
-      </section>
     </main>
 
-    <footer class="footer">Built for KOLAM · Clean, minimal UI</footer>
-  </body>
-  </html>
+    <script src="app.js"></script>
+</body>
+</html>
 
 

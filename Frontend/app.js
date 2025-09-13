@@ -9,107 +9,175 @@ const countersBox = el('counters');
 const results = el('results');
 const imgInput = el('imgInput');
 const imgProcessed = el('imgProcessed');
+const imgRecreated = el('imgRecreated');
 const svgObject = el('svgObject');
 const svgDownload = el('svgDownload');
-const recreatedWrap = el('recreated');
 const samplesWrap = el('samples');
 
 form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (!input.files[0]) return;
-  statusBox.textContent = 'Uploading and processing…';
-  if (countersBox) countersBox.textContent = '';
-  form.querySelector('button').disabled = true;
-  results.hidden = true;
-  recreatedWrap.innerHTML = '';
+    e.preventDefault();
+    if (!input.files[0]) return;
+    
+    statusBox.innerHTML = `
+        <div class="processing-animation">Processing your Kolam image...</div>
+    `;
+    
+    form.querySelector('button').disabled = true;
+    results.hidden = true;
+    document.querySelector('.recreated-showcase').style.display = 'none'; // Hide showcase initially
 
-  try {
-    const fd = new FormData();
-    fd.append('image', input.files[0]);
-    const res = await fetch(`${backend}/upload`, { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
 
-    // display
-    imgInput.src = data.input;
-    imgProcessed.src = data.processed;
-    svgObject.data = data.svg;
-    svgDownload.href = data.svg;
-    svgDownload.download = 'kolam.svg';
+    try {
+        const res = await fetch(`${backend}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await res.json();
+        console.log('Response data:', data); // Debug log
+        
+        if (!res.ok) throw new Error(data.error || 'Processing failed');
 
-    // Show specific recreation images: linemask, edges, dotsmask
-    const selected = data.recreated && Array.isArray(data.recreated) ? data.recreated : (()=>{
-      const list = [];
-      if (data.debug_files){
-        const map = data.debug_files;
-        if (map.line_mask) list.push(map.line_mask);
-        if (map.edges) list.push(map.edges);
-        if (map.dots_mask || map.dotsmask) list.push(map.dots_mask || map.dotsmask);
-      }
-      return list;
-    })();
+        // Show results
+        results.hidden = false;
+        
+        // Handle original and processed images
+        if (data.input) {
+            imgInput.src = data.input;
+        }
+        if (data.processed) {
+            imgProcessed.src = data.processed;
+        }
 
-    selected.forEach((url) => {
-      const figure = document.createElement('div');
-      const img = document.createElement('img');
-      img.src = url; img.alt = 'recreated';
-      figure.appendChild(img);
-      recreatedWrap.appendChild(figure);
-    });
+        // Handle recreated images
+        const showcaseSection = document.querySelector('.recreated-showcase');
+        if (data.debug_files && data.debug_files.dots_mask) {
+            const recreatedImages = [
+                { src: data.debug_files.line_mask, label: 'Line Detection' },
+                { src: data.debug_files.edges, label: 'Edge Detection' },
+                { src: data.debug_files.dots_mask, label: 'Dot Detection' }
+            ];
 
-    results.hidden = false;
-    if (countersBox) countersBox.textContent = `Dots: ${data.dots_count} · Lines: ${data.lines_count} (may be inaccurate, still under development)`;
-  } catch (err) {
-    statusBox.textContent = `Error: ${err.message}`;
-  } finally {
-    form.querySelector('button').disabled = false;
-  }
+            const recreatedContent = document.querySelector('.showcase-item');
+            recreatedContent.innerHTML = `
+                <h3>Recreated Images</h3>
+                <div class="recreated-grid">
+                    ${recreatedImages.map(img => `
+                        <div class="recreated-image-wrapper">
+                            <img src="${img.src}" alt="${img.label}" class="recreated-image">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            showcaseSection.style.display = 'block';
+        }
+        
+        // Handle SVG if available
+        if (data.svg) {
+            svgObject.data = data.svg;
+            svgDownload.href = data.svg;
+            svgDownload.classList.add('active');
+        }
+        
+        // Update counters
+        if (data.dots_count !== undefined && data.lines_count !== undefined) {
+            countersBox.style.display = 'flex';
+            animateCounter(el('dotsCount'), data.dots_count, 3000);
+            animateCounter(el('linesCount'), data.lines_count, 3000);
+        }
+        
+        statusBox.innerHTML = '';
+        
+    } catch (err) {
+        console.error('Processing error:', err);
+        statusBox.innerHTML = `<div class="error">Error: ${err.message}</div>`;
+    } finally {
+        form.querySelector('button').disabled = false;
+    }
 });
 
-// Sample images support: when you share images, place them under Frontend/samples/ and reference here.
-// Provide files named as below in Frontend/samples/ and they'll appear automatically.
+function animateCounter(element, target, duration = 3000) {
+    let start = 0;
+    const increment = target / (duration / 16);
+    const startTime = performance.now();
+    
+    function updateCount(currentTime) {
+        const elapsed = currentTime - startTime;
+        if (elapsed >= duration) {
+            element.textContent = target;
+            return;
+        }
+        
+        start = (elapsed / duration) * target;
+        element.textContent = Math.round(start);
+        requestAnimationFrame(updateCount);
+    }
+    
+    requestAnimationFrame(updateCount);
+}
+
+// Define sample images
 const SAMPLES = [
-  'samples/kolam1.jpg',
-  'samples/kolam2.jpg',
-  'samples/kolam3.jpg',
-  'samples/kolam4.jpg'
+    '/samples/kolam1.jpg',
+    '/samples/kolam2.jpg',
+    '/samples/kolam3.jpg',
+    '/samples/kolam4.jpg'
 ];
 
-async function loadSampleToInput(src){
-  const res = await fetch(src);
-  if (!res.ok) throw new Error('Sample not found');
-  const blob = await res.blob();
-  const filename = src.split('/').pop() || 'sample.jpg';
-  const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
-  const dt = new DataTransfer();
-  dt.items.add(file);
-  input.files = dt.files;
-}
-
-function renderSamples(){
-  if (!samplesWrap) return;
-  SAMPLES.forEach((src) => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.title = 'Try this sample';
-      btn.appendChild(img);
-      btn.addEventListener('click', async () => {
-        try {
-          await loadSampleToInput(src);
-          form.requestSubmit();
-        } catch (e) {
-          console.error(e);
-        }
-      });
-      samplesWrap.appendChild(btn);
+// Add image error handlers
+[imgInput, imgProcessed].forEach(img => {
+    if (!img) return;
+    
+    img.onerror = function() {
+        console.error(`Failed to load image: ${this.src}`);
+        this.style.display = 'none';
     };
-    img.onerror = () => {};
-  });
+    
+    img.onload = function() {
+        console.log(`Successfully loaded image: ${this.src}`);
+        this.style.display = 'block';
+    };
+});
+
+// Render sample images
+function renderSamples() {
+    const samplesWrap = el('samples');
+    if (!samplesWrap) return;
+    
+    SAMPLES.forEach(src => {
+        const btn = document.createElement('button');
+        btn.className = 'sample-btn';
+        
+        const img = new Image();
+        // Use relative path for samples
+        img.src = `.${src}`;
+        img.alt = 'Sample Kolam';
+        
+        img.onload = () => {
+            btn.appendChild(img);
+            samplesWrap.appendChild(btn);
+            
+            btn.addEventListener('click', () => {
+                fetch(img.src)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], src.split('/').pop(), { type: 'image/jpeg' });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        input.files = dataTransfer.files;
+                        form.requestSubmit();
+                    });
+            });
+        };
+        
+        img.onerror = () => console.error(`Failed to load sample: ${src}`);
+    });
 }
 
+// Initialize samples on page load
 renderSamples();
 
 

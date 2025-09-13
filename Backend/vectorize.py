@@ -2,6 +2,8 @@
 # C:\Users\parit\Desktop\SIH\Backend\vectorize.py
 import svgwrite
 import os
+import cv2
+import numpy as np
 
 def create_vector(dots, polylines, out_path=None, canvas_size=None):
     """
@@ -55,3 +57,41 @@ def create_vector(dots, polylines, out_path=None, canvas_size=None):
     dwg.add(g)
     dwg.save()
     return out_path
+
+
+def create_vector_from_dotsmask(dotsmask_path, out_path=None, canvas_size=None):
+    """
+    Create SVG directly from a dotsmask image file
+    dotsmask_path: path to the dotsmask image (white dots on black background)
+    out_path: optional path (defaults to tmp/kolam.svg)
+    canvas_size: optional (width,height) to set SVG viewbox; if None, uses image dimensions
+    """
+    os.makedirs("tmp", exist_ok=True)
+    if out_path is None:
+        out_path = os.path.join("tmp", "kolam.svg")
+
+    # Read the dotsmask image
+    img = cv2.imread(dotsmask_path, cv2.IMREAD_GRAYSCALE)
+    if img is None:
+        raise ValueError(f"Could not read image: {dotsmask_path}")
+    
+    # Find contours (dots) in the image
+    contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Extract center points of contours (dots)
+    dots = []
+    for contour in contours:
+        # Calculate moments to find center
+        M = cv2.moments(contour)
+        if M["m00"] != 0:
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+            dots.append((cx, cy))
+    
+    # Use image dimensions if canvas_size not provided
+    if canvas_size is None:
+        h, w = img.shape
+        canvas_size = (w, h)
+    
+    # Create SVG with dots only
+    return create_vector(dots, [], out_path, canvas_size)
